@@ -1,4 +1,4 @@
-import { ExtensionMessage } from '../types/index';
+import { ExtensionMessage, TimerState } from '../types/index';
 
 let overlayHost: HTMLDivElement | null = null;
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
@@ -9,7 +9,7 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`;
 }
 
-function dismissOverlay(): void {
+function removeOverlayUI(): void {
   if (countdownTimer) {
     clearInterval(countdownTimer);
     countdownTimer = null;
@@ -17,16 +17,21 @@ function dismissOverlay(): void {
   if (overlayHost) {
     overlayHost.remove();
     overlayHost = null;
-    chrome.runtime.sendMessage({ type: 'SKIP_BREAK' });
   }
 }
 
-function showOverlay(breakMinutes: number): void {
+// Called by the skip button — user action that should also reschedule the work alarm
+function dismissOverlay(): void {
+  if (!overlayHost) return;
+  removeOverlayUI();
+  chrome.runtime.sendMessage({ type: 'SKIP_BREAK' });
+}
+
+// secondsLeft: current remaining seconds; total: full break duration in seconds
+function showOverlay(secondsLeft: number, total: number): void {
   if (overlayHost) return;
 
   const gifUrl = chrome.runtime.getURL('assets/break.gif');
-  let secondsLeft = breakMinutes * 60;
-  const total = secondsLeft;
 
   const host = document.createElement('div');
   host.style.cssText =
@@ -130,14 +135,46 @@ function showOverlay(breakMinutes: number): void {
     secondsLeft = Math.max(0, secondsLeft - 1);
     timeEl.textContent = formatTime(secondsLeft);
     barEl.style.width = `${(secondsLeft / total) * 100}%`;
-    if (secondsLeft <= 0) dismissOverlay();
+    if (secondsLeft <= 0) removeOverlayUI(); // background's ALARM_BREAK handles the state transition
   }, 1000);
 
   document.body.appendChild(host);
   overlayHost = host;
 }
 
+// Pull state from the background and reconcile the overlay.
+// Called on load and on every visibilitychange so switching tabs always shows/hides correctly.
+async function syncOverlayWithState(): Promise<void> {
+  if (document.hidden) return;
+  try {
+    const state: TimerState = await chrome.runtime.sendMessage({ type: 'GET_STATE' });
+    if (state?.status === 'on_break' && state.breakStartedAt != null) {
+      const elapsedSec = Math.floor((Date.now() - state.breakStartedAt) / 1000);
+      const totalSec = state.breakMinutes * 60;
+      const remainingSec = totalSec - elapsedSec;
+      if (remainingSec > 0) {
+        showOverlay(remainingSec, totalSec);
+      } else {
+        removeOverlayUI();
+      }
+    } else if (state?.status !== 'on_break') {
+      removeOverlayUI();
+    }
+  } catch {
+    // Extension context invalidated (e.g. extension reloaded) — ignore
+  }
+}
+
 chrome.runtime.onMessage.addListener((message: ExtensionMessage) => {
-  if (message.type === 'SHOW_OVERLAY') showOverlay(message.payload.breakMinutes);
-  else if (message.type === 'DISMISS_OVERLAY') dismissOverlay();
+  if (message.type === 'SHOW_OVERLAY') {
+    const totalSec = message.payload.breakMinutes * 60;
+    showOverlay(totalSec, totalSec);
+  } else if (message.type === 'DISMISS_OVERLAY') {
+    removeOverlayUI();
+  }
 });
+
+// Check state immediately on script load (covers newly opened / refreshed tabs)
+syncOverlayWithState();
+// Re-check whenever this tab becomes visible (covers tab switching)
+document.addEventListener('visibilitychange', syncOverlayWithState);
