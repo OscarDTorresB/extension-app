@@ -20,6 +20,12 @@ export default function OverlayScreen({ breakMinutes }: Props) {
   const gifUrl = chrome.runtime.getURL('assets/break.gif');
 
   useEffect(() => {
+    chrome.storage.local.get('theme', ({ theme }) => {
+      document.documentElement.setAttribute('data-theme', theme ?? 'dark');
+    });
+  }, []);
+
+  useEffect(() => {
     if (secondsLeft <= 0) {
       dismiss();
       return;

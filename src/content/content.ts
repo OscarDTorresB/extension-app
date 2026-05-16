@@ -37,38 +37,76 @@ function showOverlay(breakMinutes: number): void {
 
   shadow.innerHTML = `
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
       *{box-sizing:border-box;margin:0;padding:0}
       .overlay{
         position:fixed;inset:0;display:flex;align-items:center;
-        justify-content:center;background:rgba(0,0,0,.85);
-        backdrop-filter:blur(6px);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+        justify-content:center;background:rgba(5,5,20,.92);
+        backdrop-filter:blur(10px);
+        font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
       }
       .card{
-        display:flex;flex-direction:column;align-items:center;gap:20px;
-        background:#fff;border-radius:20px;padding:40px 48px;
+        display:flex;flex-direction:column;align-items:center;gap:22px;
+        background:rgba(255,255,255,.06);
+        border:1px solid rgba(255,255,255,.10);
+        border-radius:24px;padding:48px 56px;
         max-width:520px;width:90%;text-align:center;
-        box-shadow:0 24px 80px rgba(0,0,0,.4);
+        backdrop-filter:blur(24px);
+        box-shadow:0 24px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);
       }
-      h1{font-size:26px;font-weight:700;color:#1a1a2e}
-      p{font-size:15px;color:#555}
-      img{width:220px;height:220px;object-fit:cover;border-radius:12px}
+      h1{
+        font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2;
+        background:linear-gradient(135deg,#a78bfa,#67e8f9);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      }
+      p{font-size:15px;color:#94a3b8;line-height:1.5;margin-top:-4px}
+      img{
+        width:220px;height:220px;object-fit:cover;border-radius:16px;
+        box-shadow:0 0 40px rgba(124,109,250,.25),0 8px 32px rgba(0,0,0,.4);
+      }
       .countdown-wrap{
-        position:relative;width:100%;background:#eee;
-        border-radius:8px;height:36px;overflow:hidden;
+        position:relative;width:100%;
+        background:rgba(255,255,255,.05);
+        border:1px solid rgba(255,255,255,.08);
+        border-radius:12px;height:44px;overflow:hidden;
         display:flex;align-items:center;justify-content:center;
       }
       .bar{
         position:absolute;left:0;top:0;height:100%;
-        background:linear-gradient(90deg,#6c63ff,#48c6ef);
-        transition:width 1s linear;border-radius:8px;
+        background:linear-gradient(90deg,#7c6dfa,#38bdf8);
+        box-shadow:0 0 16px rgba(124,109,250,.4);
+        transition:width 1s linear;border-radius:12px;
       }
-      .time{position:relative;font-size:16px;font-weight:600;color:#1a1a2e;z-index:1}
+      .time{
+        position:relative;font-size:15px;font-weight:600;
+        font-variant-numeric:tabular-nums;letter-spacing:.02em;
+        color:#f8fafc;z-index:1;
+      }
       button{
-        border:2px solid #ccc;background:transparent;color:#777;
-        font-size:14px;padding:8px 24px;border-radius:999px;
-        cursor:pointer;transition:border-color .2s,color .2s;
+        border:1px solid rgba(255,255,255,.15);background:transparent;
+        color:#94a3b8;font-family:'Inter',sans-serif;
+        font-size:13px;font-weight:600;letter-spacing:.02em;
+        padding:9px 28px;border-radius:999px;
+        cursor:pointer;transition:border-color .2s,color .2s,background .2s;
       }
-      button:hover{border-color:#6c63ff;color:#6c63ff}
+      button:hover{
+        border-color:rgba(167,139,250,.5);color:#a78bfa;
+        background:rgba(124,109,250,.08);
+      }
+      @media(prefers-color-scheme:light){
+        .overlay{background:rgba(240,240,250,.96)}
+        .card{
+          background:#fff;border-color:rgba(0,0,0,.08);
+          box-shadow:0 24px 80px rgba(0,0,0,.12),inset 0 1px 0 rgba(0,0,0,.03);
+          backdrop-filter:none;
+        }
+        p{color:#6b7280}
+        img{box-shadow:0 0 40px rgba(124,109,250,.18),0 8px 32px rgba(0,0,0,.10)}
+        .countdown-wrap{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}
+        .time{color:#111827}
+        button{border-color:rgba(0,0,0,.14);color:#6b7280}
+        button:hover{border-color:rgba(167,139,250,.5);color:#a78bfa;background:rgba(124,109,250,.08)}
+      }
     </style>
     <div class="overlay">
       <div class="card">

@@ -1,7 +1,11 @@
 interface Props {
   secondsLeft: number;
+  totalSeconds: number;
   phase: 'work' | 'break';
 }
+
+const RADIUS = 56;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -9,13 +13,48 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`;
 }
 
-export default function TimerDisplay({ secondsLeft, phase }: Props) {
+export default function TimerDisplay({ secondsLeft, totalSeconds, phase }: Props) {
+  const progress = totalSeconds > 0 ? secondsLeft / totalSeconds : 0;
+  const dashOffset = CIRCUMFERENCE * (1 - progress);
+
+  const gradientId = `ring-gradient-${phase}`;
+  const startColor = phase === 'work' ? '#7c6dfa' : '#38bdf8';
+  const endColor = phase === 'work' ? '#38bdf8' : '#a78bfa';
+
   return (
     <div className="timer-display">
       <span className={`timer-phase timer-phase--${phase}`}>
         {phase === 'work' ? '💼 Trabajando' : '🧘 En pausa'}
       </span>
-      <span className="timer-clock">{formatTime(secondsLeft)}</span>
+
+      <div className="timer-ring-wrapper">
+        <svg className="timer-ring" viewBox="0 0 140 140">
+          <defs>
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={startColor} />
+              <stop offset="100%" stopColor={endColor} />
+            </linearGradient>
+          </defs>
+          <circle
+            className="timer-ring-track"
+            cx="70"
+            cy="70"
+            r={RADIUS}
+          />
+          <circle
+            className="timer-ring-progress"
+            cx="70"
+            cy="70"
+            r={RADIUS}
+            stroke={`url(#${gradientId})`}
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={dashOffset}
+          />
+        </svg>
+        <div className="timer-ring-center">
+          <span className="timer-clock">{formatTime(secondsLeft)}</span>
+        </div>
+      </div>
     </div>
   );
 }

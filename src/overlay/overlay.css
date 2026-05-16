@@ -1,58 +1,111 @@
+/* ── Theme tokens ──────────────────────────────────────────────── */
+:root {
+  --accent-start:   #a78bfa;
+  --accent-end:     #67e8f9;
+  --primary-start:  #7c6dfa;
+  --primary-end:    #38bdf8;
+
+  /* Light (default) */
+  --overlay-bg:        rgba(240, 240, 250, 0.96);
+  --card-bg:           #ffffff;
+  --card-border:       rgba(0, 0, 0, 0.08);
+  --card-shadow:       0 24px 80px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(0, 0, 0, 0.03);
+  --text-secondary:    #6b7280;
+  --time-color:        #111827;
+  --countdown-bg:      rgba(0, 0, 0, 0.04);
+  --countdown-border:  rgba(0, 0, 0, 0.08);
+  --skip-border:       rgba(0, 0, 0, 0.14);
+  --skip-color:        #6b7280;
+  --gif-shadow:        0 0 40px rgba(124, 109, 250, 0.18), 0 8px 32px rgba(0, 0, 0, 0.10);
+}
+
+[data-theme="dark"] {
+  --overlay-bg:        rgba(5, 5, 20, 0.92);
+  --card-bg:           rgba(255, 255, 255, 0.06);
+  --card-border:       rgba(255, 255, 255, 0.10);
+  --card-shadow:       0 24px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --text-secondary:    #94a3b8;
+  --time-color:        #f8fafc;
+  --countdown-bg:      rgba(255, 255, 255, 0.05);
+  --countdown-border:  rgba(255, 255, 255, 0.08);
+  --skip-border:       rgba(255, 255, 255, 0.15);
+  --skip-color:        #94a3b8;
+  --gif-shadow:        0 0 40px rgba(124, 109, 250, 0.25), 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Reset ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   background: transparent;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* ── Overlay backdrop ──────────────────────────────────────────── */
 .overlay {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(6px);
+  background: var(--overlay-bg);
+  backdrop-filter: blur(10px);
 }
 
+/* ── Card ──────────────────────────────────────────────────────── */
 .overlay-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  background: #fff;
-  border-radius: 20px;
-  padding: 40px 48px;
+  gap: 22px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 48px 56px;
   max-width: 520px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--card-shadow);
 }
 
+[data-theme="dark"] .overlay-card { backdrop-filter: blur(24px); }
+
+/* ── Typography ────────────────────────────────────────────────── */
 .overlay-title {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
-  color: #1a1a2e;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
 }
 
 .overlay-subtitle {
   font-size: 15px;
-  color: #555;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: -6px;
 }
 
+/* ── GIF ───────────────────────────────────────────────────────── */
 .overlay-gif {
   width: 220px;
   height: 220px;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: 16px;
+  box-shadow: var(--gif-shadow);
 }
 
+/* ── Countdown bar ─────────────────────────────────────────────── */
 .overlay-countdown {
   position: relative;
   width: 100%;
-  background: #eee;
-  border-radius: 8px;
-  height: 36px;
+  background: var(--countdown-bg);
+  border: 1px solid var(--countdown-border);
+  border-radius: 12px;
+  height: 44px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -64,31 +117,39 @@ body {
   left: 0;
   top: 0;
   height: 100%;
-  background: linear-gradient(90deg, #6c63ff, #48c6ef);
+  background: linear-gradient(90deg, var(--primary-start), var(--primary-end));
   transition: width 1s linear;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 0 16px rgba(124, 109, 250, 0.4);
 }
 
 .overlay-time {
   position: relative;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: #1a1a2e;
+  font-variant-numeric: tabular-nums;
+  color: var(--time-color);
   z-index: 1;
+  letter-spacing: 0.02em;
 }
 
+/* ── Skip button ───────────────────────────────────────────────── */
 .overlay-skip {
-  border: 2px solid #ccc;
+  border: 1px solid var(--skip-border);
   background: transparent;
-  color: #777;
-  font-size: 14px;
-  padding: 8px 24px;
+  color: var(--skip-color);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 28px;
   border-radius: 999px;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  letter-spacing: 0.02em;
 }
 
 .overlay-skip:hover {
-  border-color: #6c63ff;
-  color: #6c63ff;
+  border-color: rgba(167, 139, 250, 0.5);
+  color: var(--accent-start);
+  background: rgba(124, 109, 250, 0.08);
 }

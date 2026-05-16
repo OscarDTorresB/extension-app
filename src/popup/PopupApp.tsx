@@ -4,6 +4,8 @@ import TimerDisplay from './components/TimerDisplay';
 import IntervalForm from './components/IntervalForm';
 import ControlButtons from './components/ControlButtons';
 
+type Theme = 'light' | 'dark';
+
 function deriveSecondsLeft(state: TimerState): number {
   if (state.status === 'running' && state.startedAt != null) {
     const elapsed = (Date.now() - state.startedAt) / 1000;
@@ -16,11 +18,28 @@ function deriveSecondsLeft(state: TimerState): number {
   return 0;
 }
 
+function applyTheme(theme: Theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+}
+
 export default function PopupApp() {
   const [timerState, setTimerState] = useState<TimerState>(DEFAULT_STATE);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [theme, setTheme] = useState<Theme>('dark');
 
   useEffect(() => {
+    chrome.storage.local.get(['timerState', 'theme'], (result) => {
+      const savedTheme: Theme = result.theme ?? 'dark';
+      applyTheme(savedTheme);
+      setTheme(savedTheme);
+
+      if (result.timerState) {
+        const state = result.timerState as TimerState;
+        setTimerState(state);
+        setSecondsLeft(Math.round(deriveSecondsLeft(state)));
+      }
+    });
+
     chrome.runtime.sendMessage({ type: 'GET_STATE' }, (state: TimerState) => {
       if (state) {
         setTimerState(state);
@@ -39,7 +58,6 @@ export default function PopupApp() {
     return () => chrome.storage.onChanged.removeListener(onChanged);
   }, []);
 
-  // Tick the local countdown while popup is open
   useEffect(() => {
     if (timerState.status === 'idle') return;
     const id = setInterval(() => {
@@ -47,6 +65,13 @@ export default function PopupApp() {
     }, 1000);
     return () => clearInterval(id);
   }, [timerState.status]);
+
+  function toggleTheme(): void {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    setTheme(next);
+    chrome.storage.local.set({ theme: next });
+  }
 
   function handleStart(workMinutes: number, breakMinutes: number): void {
     chrome.runtime.sendMessage(
@@ -77,6 +102,9 @@ export default function PopupApp() {
       <header className="popup-header">
         <span className="popup-logo">⏱</span>
         <h1 className="popup-title">Pausas Activas</h1>
+        <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
       </header>
 
       {timerState.status === 'idle' ? (
@@ -89,6 +117,11 @@ export default function PopupApp() {
         <>
           <TimerDisplay
             secondsLeft={secondsLeft}
+            totalSeconds={
+              timerState.status === 'on_break'
+                ? timerState.breakMinutes * 60
+                : timerState.workMinutes * 60
+            }
             phase={timerState.status === 'on_break' ? 'break' : 'work'}
           />
           <ControlButtons onStop={handleStop} />
