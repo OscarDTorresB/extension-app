@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Pausas Activas",
+  "version": "1.0.0",
+  "description": "Te recuerda tomar pausas activas durante tus jornadas de trabajo.",
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "Pausas Activas"
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/content.ts"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "permissions": ["alarms", "storage", "tabs", "activeTab"],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/break.gif"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
