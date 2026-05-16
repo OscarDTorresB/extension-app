@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { getExerciseForBreak } from '../data/exercises';
+import ExerciseCard from './ExerciseCard';
 
 interface Props {
   breakMinutes: number;
@@ -17,12 +19,19 @@ function dismiss(): void {
 export default function OverlayScreen({ breakMinutes }: Props) {
   const totalSeconds = breakMinutes * 60;
   const [secondsLeft, setSecondsLeft] = useState(totalSeconds);
-  const gifUrl = chrome.runtime.getURL('assets/break.gif');
+  const exercise = useMemo(() => getExerciseForBreak(breakMinutes), [breakMinutes]);
 
   useEffect(() => {
     chrome.storage.local.get('theme', ({ theme }) => {
       document.documentElement.setAttribute('data-theme', theme ?? 'dark');
     });
+    const onChanged = (changes: Record<string, chrome.storage.StorageChange>) => {
+      if (changes.theme?.newValue) {
+        document.documentElement.setAttribute('data-theme', changes.theme.newValue);
+      }
+    };
+    chrome.storage.onChanged.addListener(onChanged);
+    return () => chrome.storage.onChanged.removeListener(onChanged);
   }, []);
 
   useEffect(() => {
@@ -39,11 +48,11 @@ export default function OverlayScreen({ breakMinutes }: Props) {
   return (
     <div className="overlay">
       <div className="overlay-card">
-        <h1 className="overlay-title">¡Tiempo de pausa activa!</h1>
+        <h1 className="overlay-title">Pausa activa</h1>
         <p className="overlay-subtitle">
           Descansa, muévete y recarga energía.
         </p>
-        <img src={gifUrl} alt="Ejercicio de pausa activa" className="overlay-gif" />
+        <ExerciseCard exercise={exercise} />
         <div className="overlay-countdown">
           <div
             className="overlay-progress-bar"

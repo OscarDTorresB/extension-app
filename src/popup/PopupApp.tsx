@@ -100,7 +100,7 @@ export default function PopupApp() {
   return (
     <div className="popup">
       <header className="popup-header">
-        <span className="popup-logo">⏱</span>
+        <span className="popup-logo">🌿</span>
         <h1 className="popup-title">Pausas Activas</h1>
         <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
           {theme === 'dark' ? '☀️' : '🌙'}

@@ -17,36 +17,20 @@ export default function TimerDisplay({ secondsLeft, totalSeconds, phase }: Props
   const progress = totalSeconds > 0 ? secondsLeft / totalSeconds : 0;
   const dashOffset = CIRCUMFERENCE * (1 - progress);
 
-  const gradientId = `ring-gradient-${phase}`;
-  const startColor = phase === 'work' ? '#7c6dfa' : '#38bdf8';
-  const endColor = phase === 'work' ? '#38bdf8' : '#a78bfa';
-
   return (
     <div className="timer-display">
       <span className={`timer-phase timer-phase--${phase}`}>
-        {phase === 'work' ? '💼 Trabajando' : '🧘 En pausa'}
+        {phase === 'work' ? 'Trabajando' : '🌸 En pausa'}
       </span>
 
-      <div className="timer-ring-wrapper">
+      <div className={`timer-ring-wrapper timer-ring-wrapper--${phase}`}>
         <svg className="timer-ring" viewBox="0 0 140 140">
-          <defs>
-            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={startColor} />
-              <stop offset="100%" stopColor={endColor} />
-            </linearGradient>
-          </defs>
-          <circle
-            className="timer-ring-track"
-            cx="70"
-            cy="70"
-            r={RADIUS}
-          />
+          <circle className="timer-ring-track" cx="70" cy="70" r={RADIUS} />
           <circle
             className="timer-ring-progress"
             cx="70"
             cy="70"
             r={RADIUS}
-            stroke={`url(#${gradientId})`}
             strokeDasharray={CIRCUMFERENCE}
             strokeDashoffset={dashOffset}
           />
